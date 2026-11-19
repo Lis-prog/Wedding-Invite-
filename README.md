@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wedding Invite
 
-## Getting Started
+Interactive wedding invitation inspired by your reference style.  
+Built with Next.js and ready to deploy on Vercel.
 
-First, run the development server:
+## Features
+
+- Styled invite flow with intro, 4 questions, and final verdict screen
+- Custom invite links per guest category:
+  - `single`
+  - `couple`
+  - `family` (with kids count)
+- Easy sharing by link in WhatsApp, SMS, Viber, Facebook Messenger
+- RSVP submit to Supabase (`/api/rsvp`)
+- Admin page at `/admin` to load responses with password
+
+## Run Locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` in project root (or copy from `.env.example`):
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_or_publishable_key
+SUPABASE_SERVICE_ROLE_KEY=optional_but_recommended_for_admin_reads
+ADMIN_PASSWORD=choose-a-strong-password
+```
 
-To learn more about Next.js, take a look at the following resources:
+`SUPABASE_SERVICE_ROLE_KEY` is strongly recommended for secure admin reads.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Supabase Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Run SQL from `supabase-schema.sql` in Supabase SQL Editor.
 
-## Deploy on Vercel
+This creates a `responses` table and allows public `insert` for RSVP submissions.
+Admin reads happen through server route (`/api/admin/responses`) protected by `ADMIN_PASSWORD`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Personal Link Format
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Use query params to personalize each invite:
+
+```text
+/?name=Arta&type=single
+/?name=Luan&type=couple&partner=Era
+/?name=Blerim%20Family&type=family&children=2
+/?invite=INV-0001&name=Arta&type=single
+```
+
+## Auto-Generate Guest Links
+
+1. Edit `guests.example.json` with your real guests.
+2. Run:
+
+```bash
+npm run generate:links
+```
+
+This generates `guest-links.txt` with ready-to-send links.
+
+Optional: set production domain while generating links:
+
+```bash
+INVITE_BASE_URL=https://your-domain.com npm run generate:links
+```
+
+PowerShell variant:
+
+```powershell
+$env:INVITE_BASE_URL="https://your-domain.com"; npm run generate:links
+```
+
+## Admin
+
+Open `/admin`, enter `ADMIN_PASSWORD`, then click `Load responses`.
+
+## Deploy to Vercel
+
+1. Push project to GitHub (or import folder directly to Vercel).
+2. In Vercel, import the project.
+3. Add environment variables from `.env.local` in Vercel Project Settings.
+4. Deploy with default Next.js settings.
+5. Use your Vercel URL (or custom domain) as `INVITE_BASE_URL`.
